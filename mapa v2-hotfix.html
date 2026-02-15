@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Esquema visual - Ejes Articuladores NEM</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0a1628, #1a2a4a, #0d2137);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* HEADER */
+        .header {
+            text-align: center;
+            padding: 40px 20px 20px;
+        }
+
+        .header h1 {
+            color: #ffffff;
+            font-size: 2em;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 30px rgba(0, 200, 255, 0.3);
+        }
+
+        .header p {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.95em;
+            margin-top: 8px;
+        }
+
+        .header .badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #e91e63, #ff5722);
+            color: white;
+            padding: 6px 20px;
+            border-radius: 25px;
+            font-size: 0.75em;
+            font-weight: 700;
+            margin-top: 12px;
+            letter-spacing: 1px;
+        }
+
+        /* MAPA CONTAINER */
+        .mapa-container {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* SVG CONEXIONES */
+        .conexiones-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .conexion-line {
+            stroke: rgba(255,255,255,0.08);
+            stroke-width: 2;
+            fill: none;
+            transition: stroke 0.5s, stroke-width 0.5s;
+        }
+
+        .conexion-line.active {
+            stroke: rgba(0, 200, 255, 0.4);
+            stroke-width: 3;
+            filter: drop-shadow(0 0 6px rgba(0, 200, 255, 0.3));
+        }
+
+        /* CENTRO */
+        .centro {
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #e91e63, #ff5722, #ff9800);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            margin: 0 auto 40px;
+            position: relative;
+            z-index: 10;
+            cursor: pointer;
+            box-shadow: 
+                0 0 40px rgba(233, 30, 99, 0.4),
+                0 0 80px rgba(233, 30, 99, 0.2),
+                inset 0 0 30px rgba(255,255,255,0.1);
+            animation: pulseCenter 3s ease-in-out infinite;
+            transition: transform 0.3s;
+        }
+
+        .centro:hover {
+            transform: scale(1.08);
+        }
+
+        @keyframes pulseCenter {
+            0%, 100% { box-shadow: 0 0 40px rgba(233, 30, 99, 0.4), 0 0 80px rgba(233, 30, 99, 0.2); }
+            50% { box-shadow: 0 0 60px rgba(233, 30, 99, 0.6), 0 0 100px rgba(233, 30, 99, 0.3); }
+        }
+
+        .centro-icon {
+            font-size: 40px;
+            margin-bottom: 5px;
+        }
+
+        .centro h2 {
+            color: white;
+            font-size: 0.85em;
+            font-weight: 800;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            line-height: 1.3;
+            padding: 0 15px;
+        }
+
+        .centro p {
+            color: rgba(255,255,255,0.8);
+            font-size: 0.6em;
+            margin-top: 3px;
+        }
+
+        /* GRID DE EJES */
+        .ejes-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .eje-card {
+            border-radius: 20px;
+            padding: 25px 20px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            overflow: hidden;
+            border: 2px solid transparent;
+        }
+
+        .eje-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.4s;
+            border-radius: 18px;
+        }
+
+        .eje-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .eje-card:hover::before {
+            opacity: 1;
+        }
+
+        .eje-card.expanded {
+            grid-column: span 2;
+        }
+
+        .eje-icon {
+            width: 55px;
+            height: 55px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+
+        .eje-card h3 {
+            color: white;
+            font-size: 1em;
+            font-weight: 700;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .eje-card .descripcion {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.78em;
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+        .eje-card .ejemplo {
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            border-left: 3px solid rgba(255,255,255,0.3);
+        }
+
+        .eje-card .ejemplo-title {
+            color: rgba(255,255,255,0.9);
+            font-size: 0.72em;
+            font-weight: 700;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .eje-card .ejemplo p {
+            color: rgba(255,255,255,0.65);
+            font-size: 0.72em;
+            line-height: 1.4;
+        }
+
+        .eje-detalle {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease, opacity 0.3s;
+            opacity: 0;
+        }
+
+        .eje-card.active .eje-detalle {
+            max-height: 500px;
+            opacity: 1;
+        }
+
+        .eje-tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.65em;
+            font-weight: 600;
+            margin-top: 8px;
+            background: rgba(255,255,255,0.15);
+            color: rgba(255,255,255,0.8);
+        }
+
+        /* COLORES POR EJE */
+        .eje-inclusion {
+            background: linear-gradient(135deg, rgba(96, 125, 139, 0.6), rgba(69, 90, 100, 0.8));
+        }
+        .eje-inclusion .eje-icon { background: linear-gradient(135deg, #607d8b, #455a64); }
+        .eje-inclusion:hover { box-shadow: 0 10px 40px rgba(96, 125, 139, 0.4); }
+
+        .eje-interculturalidad {
+            background: linear-gradient(135deg, rgba(0, 150, 136, 0.6), rgba(0, 105, 92, 0.8));
+        }
+        .eje-interculturalidad .eje-icon { background: linear-gradient(135deg, #009688, #00695c); }
+        .eje-interculturalidad:hover { box-shadow: 0 10px 40px rgba(0, 150, 136, 0.4); }
+
+        .eje-genero {
+            background: linear-gradient(135deg, rgba(156, 39, 176, 0.6), rgba(106, 27, 154, 0.8));
+        }
+        .eje-genero .eje-icon { background: linear-gradient(135deg, #9c27b0, #6a1b9a); }
+        .eje-genero:hover { box-shadow: 0 10px 40px rgba(156, 39, 176, 0.4); }
+
+        .eje-critico {
+            background: linear-gradient(135deg, rgba(255, 152, 0, 0.6), rgba(230, 81, 0, 0.8));
+        }
+        .eje-critico .eje-icon { background: linear-gradient(135deg, #ff9800, #e65100); }
+        .eje-critico:hover { box-shadow: 0 10px 40px rgba(255, 152, 0, 0.4); }
+
+        .eje-saludable {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.6), rgba(27, 94, 32, 0.8));
+        }
+        .eje-saludable .eje-icon { background: linear-gradient(135deg, #4caf50, #1b5e20); }
+        .eje-saludable:hover { box-shadow: 0 10px 40px rgba(76, 175, 80, 0.4); }
+
+        .eje-artes {
+            background: linear-gradient(135deg, rgba(233, 30, 99, 0.6), rgba(136, 14, 79, 0.8));
+        }
+        .eje-artes .eje-icon { background: linear-gradient(135deg, #e91e63, #880e4f); }
+        .eje-artes:hover { box-shadow: 0 10px 40px rgba(233, 30, 99, 0.4); }
+
+        .eje-lectura {
+            background: linear-gradient(135deg, rgba(33, 150, 243, 0.6), rgba(13, 71, 161, 0.8));
+        }
+        .eje-lectura .eje-icon { background: linear-gradient(135deg, #2196f3, #0d47a1); }
+        .eje-lectura:hover { box-shadow: 0 10px 40px rgba(33, 150, 243, 0.4); }
+
+        /* CONEXIONES SECTION */
+        .conexiones-section {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .conexiones-title {
+            text-align: center;
+            color: white;
+            font-size: 1.4em;
+            font-weight: 800;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .conexiones-title span {
+            color: #00e5ff;
+        }
+
+        .conexiones-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .conexion-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .conexion-card:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+        }
+
+        .conexion-ejes {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .conexion-eje-tag {
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-size: 0.65em;
+            font-weight: 700;
+            color: white;
+        }
+
+        .tag-inclusion { background: #607d8b; }
+        .tag-interculturalidad { background: #009688; }
+        .tag-genero { background: #9c27b0; }
+        .tag-critico { background: #ff9800; }
+        .tag-saludable { background: #4caf50; }
+        .tag-artes { background: #e91e63; }
+        .tag-lectura { background: #2196f3; }
+
+        .conexion-flecha {
+            color: #00e5ff;
+            font-size: 1.2em;
+        }
+
+        .conexion-card h4 {
+            color: rgba(255,255,255,0.9);
+            font-size: 0.85em;
+            margin-bottom: 5px;
+        }
+
+        .conexion-card p {
+            color: rgba(255,255,255,0.5);
+            font-size: 0.75em;
+            line-height: 1.4;
+        }
+
+        /* APLICACIÓN SECTION */
+        .aplicacion-section {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .aplicacion-title {
+            text-align: center;
+            color: white;
+            font-size: 1.4em;
+            font-weight: 800;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .aplicacion-title span {
+            color: #69f0ae;
+        }
+
+        .aplicacion-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .aplicacion-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 30px 25px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .aplicacion-card:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .aplicacion-emoji {
+            font-size: 45px;
+            margin-bottom: 15px;
+        }
+
+        .aplicacion-card h3 {
+            color: white;
+            font-size: 1.05em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .aplicacion-card p {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.8em;
+            line-height: 1.5;
+        }
+
+        .aplicacion-lista {
+            text-align: left;
+            margin-top: 12px;
+        }
+
+        .aplicacion-lista li {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.75em;
+            padding: 4px 0;
+            list-style: none;
+            line-height: 1.4;
+        }
+
+        .aplicacion-lista li::before {
+            content: '✦ ';
+            color: #69f0ae;
+        }
+
+        /* FOOTER */
+        .footer {
+            max-width: 1200px;
+            margin: 40px auto 20px;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .footer-quote {
+            color: rgba(255,255,255,0.5);
+            font-size: 0.95em;
+            font-style: italic;
+            line-height: 1.7;
+            max-width: 700px;
+            margin: 0 auto 15px;
+        }
+
+        .footer-source {
+            color: rgba(255,255,255,0.3);
+            font-size: 0.7em;
+        }
+
+        .footer-tags {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .footer-tag {
+            background: rgba(255,255,255,0.08);
+            color: rgba(255,255,255,0.5);
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.65em;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 900px) {
+            .ejes-grid { grid-template-columns: repeat(2, 1fr); }
+            .conexiones-grid { grid-template-columns: repeat(2, 1fr); }
+            .aplicacion-grid { grid-template-columns: 1fr; }
+            .eje-card.expanded { grid-column: span 1; }
+            .header h1 { font-size: 1.4em; }
+            .centro { width: 180px; height: 180px; }
+        }
+
+        @media (max-width: 600px) {
+            .ejes-grid { grid-template-columns: 1fr; }
+            .conexiones-grid { grid-template-columns: 1fr; }
+            .stats-mini { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        /* PRINT */
+        @media print {
+            body { background: white; }
+            .header h1 { color: #333; text-shadow: none; }
+            .header p, .footer-quote { color: #666; }
+            .eje-card { break-inside: avoid; border: 1px solid #ddd; }
+            .eje-card h3 { color: #333; }
+            .eje-card .descripcion { color: #555; }
+            .conexion-card { border: 1px solid #ddd; break-inside: avoid; }
+            .conexion-card h4, .conexion-card p { color: #333; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+    <h1>Ejes Articuladores</h1>
+    <p>Esquema de la Nueva Escuela Mexicana</p>
+    <div class="badge">📋 Plan de Estudio 2022 — MEJOREDU</div>
+</div>
+
+<!-- CENTRO DEL MAPA -->
+<div class="mapa-container">
+    <div class="centro" onclick="toggleAllCards()">
+        <div class="centro-icon">🎯</div>
+        <h2>Ejes Articuladores NEM</h2>
+        <p>Haz clic para explorar</p>
+    </div>
+
+    <!-- GRID DE EJES -->
+    <div class="ejes-grid">
+
+        <!-- EJE 1: INCLUSIÓN -->
+        <div class="eje-card eje-inclusion" onclick="toggleCard(this)">
+            <div class="eje-icon">🤝</div>
+            <h3>Inclusión</h3>
+            <div class="descripcion">Cuestiona la exclusión, el racismo, la desigualdad y la discriminación como violaciones a la dignidad humana.</div>
+            <div class="eje-detalle">
+                <div class="ejemplo">
+                    <div class="ejemplo-title">🏫 En la escuela</div>
+                    <p>Adaptar actividades para que estudiantes con discapacidad participen en igualdad de condiciones con sus compañeros.</p>
+                </div>
+                <div class="ejemplo">
+                    <div class="ejemplo-title">💼 En el trabajo</div>
+                    <p>Garantizar procesos de contratación que no discriminen por origen étnico, edad, género o condición social.</p>
+                </div>
+                <div class="ejemplo">
+                    <div class="ejemplo-title">🏘️ En la comunidad</div>
+                    <p>Crear espacios públicos accesibles para personas con movilidad reducida y adultos mayores.</p>
+                </div>
+                <div class="eje-tag">Nadie se queda atrás ni fuera</div>
+            </div>
+        </div>
+
+        <!-- EJE 2: INTERCULTURALIDAD CRÍTICA -->
+        <div class="eje-card eje-interculturalidad" onclick="toggleCard(this)">
+            <div class="eje-icon">🌍</div>
+            <h3>Interculturalidad Crítica</h3>
+            <div class="descripcion">Reconoce y valora que existen diferentes formas de ser, pensar, vivir y sentir el mundo.</div>
+            <div class="eje-detalle">
+                <div class="ejemplo">
+                    <div class="ejemplo-title">🏫 En la escuela</div>
+                    <p>Valorar las costumbres y lenguas de estudiantes indígenas como parte del aprendizaje colectivo.</p>
+                </div>
+                <div class="ejemplo">
+                    <div class="ejemplo-title">💼 En el trabajo</div>
+                    <p>Respetar las prácticas culturales de compañeros de diferentes regiones o países sin imponer una cultura dominante.</p>
+                </div>
+                <div class="ejemplo">
+                    <div class="ejemplo-title">🏘️ En la comunidad</div>
+                    <p>Organizar festivales culturales donde cada familia comparta sus tradiciones y formas de celebrar.</p>
+                </div>
+                <div class="eje-tag">Diferentes formas de ver el mundo</div>
+            </div>
+        </div>
+
+        <!-- EJE 3: IGUALDAD DE GÉNERO -->
+        <div class="eje-card eje-genero" onclick="toggleCard(this)">
+            <div class="eje-icon">⚖️</div>
+            <h3>Igualdad de Género</h3>
+            <div class="descripcion">Elimina barreras basadas en prejuicios y estereotipos de género que obstaculizan el libre desarrollo de las personas.</div>
+            <div class="eje-detalle">
+                <div class="ejemplo">
+                    <div class="ejemplo-title">🏫 En la escuela</div>
+                    <p>Cuestionar cuando alguien dice que las matemáticas "son para hombres" o que los hombres "no deben llorar".</p>
+                </div>
+                <div class="ejemplo">
+                    <div class="ejemplo-title">💼 En el trabajo</div>
+                    <p>Promover igualdad salarial y acceso equitativo a puestos de liderazgo para hombres y mujeres.</p>
+                </div>
+                <div class="ejemplo">
+                    <div class="ejemplo-title">🏘️ En la comunidad</div>
+                    <p>Distribuir las tareas del hogar de manera equitativa entre todos los miembros de la familia.</p>
+                </div>
+                <div class="eje-tag">Mismas oportunidades para todos</div>
+            </div>
+        </div>
+
+        <!-- EJE 4: PENSAMIENTO CRÍTICO -->
+        <div class="eje-card eje-critico" onclick="toggleCard(this)">
+            <div class="eje-icon">🧠</div>
+            <h3>Pensamiento Crítico</h3>
+            <div class="descripcion">Cuestiona las condiciones del mundo y nuestras propias ideas como base para generar cambios positivos.</div>
+            <div class="eje-detalle">
+                <div class="ejemplo">
+                    <div class="ejemplo-title">🏫 En la escuela</div>
+                    <p>Analizar por qué existen desigualdades en lugar de aceptarlas como algo "normal" o inevitable.</p>
+                </div>
+                <div class="ejemplo">
+                    <div class="ejemplo-title">💼 En el trabajo</div>
+                    <p>Cuestionar procesos ineficientes o injustos y proponer alternativas basadas en evidencia y diálogo.</p>
+                </div>
+                <div class="ejemplo">
+                    <div class="ejemplo-title">🏘️ En la comunidad</div>
+                    <p>No creer todo lo que circula en redes sociales; verificar información antes de compartirla.</p>
+                </div>
+                <div class="eje-tag">Cuestionar para transformar</div>
+            </div>
+        </div>
+
+        <!-- EJE 5: VIDA SALUDABLE -->
+        <div class="eje-card eje-saludable" onclick="toggleCard(this)">
+            <div class="eje-icon">🌿</div>
+            <h3>Vida Saludable</h3>
+            <div class="descripcion">Promueve el derecho a la protección de la salud física y emocional en condiciones de igualdad.</div>
+            <div class="eje-detalle">
+                <div class="ejemplo">
+                    <div class="ejemplo-title">🏫 En la escuela</div>
+                    <p>Promover la alimentación saludable y la actividad física como parte de la rutina escolar diaria.</p>
+                </div>
+                <div class="ejemplo">
+                    <div class="ejemplo-title">💼 En el trabajo</div>
+                    <p>Respetar horarios laborales, tomar descansos y cuidar la salud mental en el entorno laboral.</p>
+                </div>
+                <div class="ejemplo">
+                    <div class="ejemplo-title">🏘️ En la comunidad</div>
+                    <p>Organizar actividades deportivas comunitarias y crear espacios de diálogo sobre bienestar emocional.</p>
+                </div>
+                <div class="eje-tag">Salud física y emocional para todos</div>
+            </div>
+        </div>
+
+        <!-- EJE 6: ARTES Y EXPERIENCIAS ESTÉTICAS -->
+        <div class="eje-card eje-artes" onclick="toggleCard(this)">
+            <div class="eje-icon">🎨</div>
+            <h3>Artes y Experiencias Estéticas</h3>
+            <div class="descripcion">Explora, aprecia y expresa el mundo mediante manifestaciones artísticas que le den sentido a nuestra realidad.</div>
+            <div class="eje-detalle">
+                <div class="ejemplo">
+                    <div class="ejemplo-title">🏫 En la escuela</div>
+                    <p>Usar el dibujo, la música y el teatro para que los estudiantes expresen sus emociones y experiencias de vida.</p>
+                </div>
+                <div class="ejemplo">
+                    <div class="ejemplo-title">💼 En el trabajo</div>
+                    <p>Incorporar elementos creativos en presentaciones y proyectos para comunicar ideas de forma más efectiva.</p>
+                </div>
+                <div class="ejemplo">
+                    <div class="ejemplo-title">🏘️ En la comunidad</div>
+                    <p>Crear murales comunitarios que representen la historia e identidad del barrio o la localidad.</p>
+                </div>
+                <div class="eje-tag">Expresar para transformar</div>
+            </div>
+        </div>
+
+        <!-- EJE 7: APROPIACIÓN DE CULTURAS -->
+        <div class="eje-card eje-lectura" onclick="toggleCard(this)">
+            <div class="eje-icon">📚</div>
+            <h3>Apropiación de las Culturas a través de la Lectura y Escritura</h3>
+            <div class="descripcion">Reconoce las culturas y lenguas como vehículos de ideas y saberes que fortalecen las identidades.</div>
+            <div class="eje-detalle">
+                <div class="ejemplo">
+                    <div class="ejemplo-title">🏫 En la escuela</div>
+                    <p>Leer textos de autores de diferentes culturas y regiones para conocer otras formas de entender el mundo.</p>
+                </div>
+                <div class="ejemplo">
+                    <div class="ejemplo-title">💼 En el trabajo</div>
+                    <p>Documentar y compartir las historias y conocimientos de los compañeros como patrimonio del equipo.</p>
+                </div>
+                <div class="ejemplo">
+                    <div class="ejemplo-title">🏘️ En la comunidad</div>
+                    <p>Registrar la memoria oral de los adultos mayores de la comunidad para preservar la historia local.</p>
+                </div>
+                <div class="eje-tag">Leer y escribir para ser libres</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- CONEXIONES ENTRE EJES -->
+<div class="conexiones-section">
+    <div class="conexiones-title">🔗 <span>Conexiones</span> entre los ejes</div>
+    <div class="conexiones-grid">
+        <div class="conexion-card">
+            <div class="conexion-ejes">
+                <span class="conexion-eje-tag tag-inclusion">Inclusión</span>
+                <span class="conexion-flecha">⟷</span>
+                <span class="conexion-eje-tag tag-genero">Igualdad de género</span>
+            </div>
+            <h4>Eliminar barreras de discriminación</h4>
+            <p>Ambos ejes trabajan para que ninguna persona sea excluida por su género, orientación o identidad.</p>
+        </div>
+
+        <div class="conexion-card">
+            <div class="conexion-ejes">
+                <span class="conexion-eje-tag tag-critico">Pensamiento crítico</span>
+                <span class="conexion-flecha">⟷</span>
+                <span class="conexion-eje-tag tag-interculturalidad">Interculturalidad</span>
+            </div>
+            <h4>Cuestionar para valorar la diversidad</h4>
+            <p>El pensamiento crítico permite analizar y superar los prejuicios que impiden valorar otras culturas.</p>
+        </div>
+
+        <div class="conexion-card">
+            <div class="conexion-ejes">
+                <span class="conexion-eje-tag tag-saludable">Vida saludable</span>
+                <span class="conexion-flecha">⟷</span>
+                <span class="conexion-eje-tag tag-artes">Artes</span>
+            </div>
+            <h4>Bienestar integral</h4>
+            <p>Las artes contribuyen al bienestar emocional, complementando la salud física para una vida plena.</p>
+        </div>
+
+        <div class="conexion-card">
+            <div class="conexion-ejes">
+                <span class="conexion-eje-tag tag-lectura">Lectura y escritura</span>
+                <span class="conexion-flecha">⟷</span>
+                <span class="conexion-eje-tag tag-critico">Pensamiento crítico</span>
+            </div>
+            <h4>Leer para cuestionar y transformar</h4>
+            <p>La lectura crítica permite analizar la información, formar opiniones propias y expresarlas con claridad.</p>
+        </div>
+
+        <div class="conexion-card">
+            <div class="conexion-ejes">
+                <span class="conexion-eje-tag tag-genero">Igualdad de género</span>
+                <span class="conexion-flecha">⟷</span>
+                <span class="conexion-eje-tag tag-critico">Pensamiento crítico</span>
+            </div>
+            <h4>Cuestionar estereotipos</h4>
+            <p>Solo a través del pensamiento crítico podemos identificar y desafiar los estereotipos de género normalizados.</p>
+        </div>
+
+        <div class="conexion-card">
+            <div class="conexion-ejes">
+                <span class="conexion-eje-tag tag-inclusion">Inclusión</span>
+                <span class="conexion-flecha">⟷</span>
+                <span class="conexion-eje-tag tag-saludable">Vida saludable</span>
+            </div>
+            <h4>Salud como derecho para todos</h4>
+            <p>La inclusión garantiza que todas las personas tengan acceso equitativo a servicios de salud y bienestar.</p>
+        </div>
+    </div>
+</div>
+
+<!-- APLICACIÓN EN CONTEXTOS -->
+<div class="aplicacion-section">
+    <div class="aplicacion-title">🌎 Aplicación en <span>nuestros contextos</span></div>
+    <div class="aplicacion-grid">
+        <div class="aplicacion-card">
+            <div class="aplicacion-emoji">🏫</div>
+            <h3>En la Escuela</h3>
+            <p>Los ejes articuladores guían la práctica docente para formar ciudadanos críticos, empáticos e inclusivos.</p>
+            <ul class="aplicacion-lista">
+                <li>Adaptar actividades para incluir a todos</li>
+                <li>Fomentar el diálogo y la reflexión</li>
+                <li>Valorar la diversidad cultural del aula</li>
+                <li>Promover hábitos saludables</li>
+                <li>Usar el arte como herramienta de expresión</li>
+            </ul>
+        </div>
+
+        <div class="aplicacion-card">
+            <div class="aplicacion-emoji">💼</div>
+            <h3>En el Trabajo</h3>
+            <p>Los principios de la NEM pueden transformar cualquier espacio laboral en un entorno más justo y humano.</p>
+            <ul class="aplicacion-lista">
+                <li>Promover igualdad de oportunidades</li>
+                <li>Respetar la diversidad del equipo</li>
+                <li>Cuidar la salud mental y física</li>
+                <li>Cuestionar prácticas injustas</li>
+                <li>Fomentar la colaboración sobre la competencia</li>
+            </ul>
+        </div>
+
+        <div class="aplicacion-card">
+            <div class="aplicacion-emoji">🏘️</div>
+            <h3>En la Comunidad</h3>
+            <p>Cada persona puede ser agente de cambio en su comunidad aplicando estos principios en su vida diaria.</p>
+            <ul class="aplicacion-lista">
+                <li>Escuchar y respetar a los vecinos</li>
+                <li>Organizar actividades culturales y deportivas</li>
+                <li>Combatir la discriminación desde el ejemplo</li>
+                <li>Preservar las tradiciones locales</li>
+                <li>Construir espacios seguros para todos</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+    <div class="footer-quote">
+        "Los ejes articuladores constituyen un componente que permite desarrollar el currículo desde una perspectiva ética para aprender y enseñar en, desde y para la comunidad."
+    </div>
+    <div class="footer-source">
+        Plan de Estudio para la educación preescolar, primaria y secundaria 2022<br>
+        Nueva Escuela Mexicana | Comisión Nacional para la Mejora Continua de la Educación (MEJOREDU)
+    </div>
+    <div class="footer-tags">
+        <span class="footer-tag">🤝 Inclusión</span>
+        <span class="footer-tag">🌍 Interculturalidad</span>
+        <span class="footer-tag">⚖️ Igualdad de género</span>
+        <span class="footer-tag">🧠 Pensamiento crítico</span>
+        <span class="footer-tag">🌿 Vida saludable</span>
+        <span class="footer-tag">🎨 Artes</span>
+        <span class="footer-tag">📚 Lectura y escritura</span>
+    </div>
+</div>
+
+<script>
+    function toggleCard(card) {
+        const wasActive = card.classList.contains('active');
+        
+        // Cerrar todas las cards
+        document.querySelectorAll('.eje-card').forEach(c => {
+            c.classList.remove('active');
+        });
+        
+        // Si no estaba activa, abrirla
+        if (!wasActive) {
+            card.classList.add('active');
+        }
+    }
+
+    function toggleAllCards() {
+        const cards = document.querySelectorAll('.eje-card');
+        const anyActive = document.querySelector('.eje-card.active');
+        
+        if (anyActive) {
+            cards.forEach(c => c.classList.remove('active'));
+        } else {
+            cards.forEach(c => c.classList.add('active'));
+        }
+    }
+
+    // Efecto de aparición al hacer scroll
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.eje-card, .conexion-card, .aplicacion-card').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(el);
+    });
+</script>
+
+</body>
+</html>
